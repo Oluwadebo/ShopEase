@@ -138,7 +138,7 @@ footer {
   font-size: 14px;
 }
 
-/* index */
+/* index.html */
 
 .hero {
   padding: 36px 0 12px;
@@ -247,6 +247,8 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+/* script.js style */
 
 .card {
   background: linear-gradient(
