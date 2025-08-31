@@ -135,18 +135,50 @@
               data-cat="all"
               role="tab"
               aria-selected="true"
+              onload="true"
             >
               All
             </button>
-            <button class="chip" data-cat="electronics" role="tab">
+            <button
+              class="chip"
+              data-cat="electronics"
+              role="tab"
+              aria-selected="false"
+            >
               Electronics
             </button>
-            <button class="chip" data-cat="fashion" role="tab">Fashion</button>
-            <button class="chip" data-cat="home" role="tab">Home</button>
-            <button class="chip" data-cat="accessories" role="tab">
+            <button
+              class="chip"
+              data-cat="fashion"
+              role="tab"
+              aria-selected="false"
+            >
+              Fashion
+            </button>
+            <button
+              class="chip"
+              data-cat="home"
+              role="tab"
+              aria-selected="false"
+            >
+              Home
+            </button>
+            <button
+              class="chip"
+              data-cat="accessories"
+              role="tab"
+              aria-selected="false"
+            >
               Accessories
             </button>
-            <button class="chip" data-cat="beauty" role="tab">Beauty</button>
+            <button
+              class="chip"
+              data-cat="beauty"
+              role="tab"
+              aria-selected="false"
+            >
+              Beauty
+            </button>
           </div>
           <select class="sort" id="sortSelect" aria-label="Sort products">
             <option value="relevance">Sort: Relevance</option>
@@ -166,14 +198,7 @@
         aria-hidden="true"
       >
         <header class="container">
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              gap: 10px;
-            "
-          >
+          <div style="display: flex; align-items: center; gap: 20%">
             <h3>Your Cart</h3>
             <button class="icon-btn" id="closeCart" aria-label="Close cart">
               ✕
@@ -198,6 +223,54 @@
             Built with ❤️ for ShopEase purposes. Replace images, copy, and
             products with your own.
           </div>
+        </div>
+      </footer>
+      <footer class="footer">
+        <div class="footer-container footer-inner">
+          <!-- About -->
+          <div class="footer-section">
+            <h3>ShopEase</h3>
+            <p>
+              Your one-stop shop for electronics, fashion, and more. Quality
+              products at the best prices.
+            </p>
+          </div>
+
+          <!-- Links -->
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="/about">About Us</a></li>
+              <li><a href="/contact">Contact</a></li>
+              <li><a href="/faq">FAQs</a></li>
+              <li><a href="/profile">My Account</a></li>
+            </ul>
+          </div>
+
+          <!-- Customer Service -->
+          <div class="footer-section">
+            <h4>Customer Service</h4>
+            <ul>
+              <li><a href="/shipping">Shipping & Returns</a></li>
+              <li><a href="/privacy">Privacy Policy</a></li>
+              <li><a href="/terms">Terms & Conditions</a></li>
+            </ul>
+          </div>
+
+          <!-- Socials -->
+          <div class="footer-section">
+            <h4>Follow Us</h4>
+            <div class="social-icons">
+              <a href="#"><i class="fab fa-facebook"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; <span id="year"></span> ShopEase. All rights reserved.</p>
         </div>
       </footer>
     </div>
