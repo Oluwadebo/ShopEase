@@ -286,7 +286,6 @@ function changeQty(id, delta) {
   saveCart();
   renderCart();
 }
-
 function renderCart() {
   cartList.innerHTML = state.cart
     .map(
@@ -322,7 +321,6 @@ function renderCart() {
 
   cartCountEl.textContent = state.cart.reduce((s, i) => s + i.qty, 0);
 }
-
 function openCart() {
   cartDrawer.classList.add("open");
   cartDrawer.setAttribute("aria-hidden", "false");
@@ -332,6 +330,7 @@ function closeCart() {
   cartDrawer.setAttribute("aria-hidden", "true");
 }
 
+// onload of the page
 document.addEventListener("DOMContentLoaded", () => {
   // Make sure "All" chip is active on load
   const allChip = document.querySelector('.chip[data-cat="all"]');
@@ -348,7 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render all products on page load
   renderProducts();
 });
-
 // ---------- Events ----------
 chips.addEventListener("click", (e) => {
   const btn = e.target.closest(".chip");
