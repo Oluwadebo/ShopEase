@@ -1,5 +1,15 @@
-// footer year
-document.getElementById("year").textContent = new Date().getFullYear();
+// onload of all page
+fetch("header.html")
+  .then((response) => response.text())
+  .then((data) => {
+    document.getElementById("header").innerHTML = data;
+  });
+  fetch("footer.html")
+  .then((response) => response.text())
+  .then((data) => {
+    document.getElementById("footer").innerHTML = data;
+    document.getElementById("year").textContent = new Date().getFullYear();
+  });
 // Products data
 const PRODUCTS = [
   {
@@ -330,7 +340,7 @@ function closeCart() {
   cartDrawer.setAttribute("aria-hidden", "true");
 }
 
-// onload of the page
+// onload of index page
 document.addEventListener("DOMContentLoaded", () => {
   // Make sure "All" chip is active on load
   const allChip = document.querySelector('.chip[data-cat="all"]');
