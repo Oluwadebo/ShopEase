@@ -9,12 +9,94 @@
   <body>
     <div>
       <div id="header"></div>
+      <main class="container">
 
+  <!-- Section 1: Product Details -->
+  <section class="product-detail" id="productDetail">
+    <div class="product-images" id="productImages"></div>
+    <div class="product-info" id="productInfo"></div>
+  </section>
+
+  <!-- Section 2: Similar Products -->
+  <section class="similar-products">
+    <h2>Similar Products</h2>
+    <div class="product-grid" id="similarProducts"></div>
+  </section>
+
+</main>
+      <main class="container">
+        <section aria-label="Filters" class="filters">
+          <div
+            class="chips"
+            id="categoryChips"
+            role="tablist"
+            aria-label="Product Categories"
+          >
+            <button
+              class="chip active"
+              data-cat="all"
+              role="tab"
+              aria-selected="true"
+              onload="true"
+            >
+              All
+            </button>
+            <button
+              class="chip"
+              data-cat="electronics"
+              role="tab"
+              aria-selected="false"
+            >
+              Electronics
+            </button>
+            <button
+              class="chip"
+              data-cat="fashion"
+              role="tab"
+              aria-selected="false"
+            >
+              Fashion
+            </button>
+            <button
+              class="chip"
+              data-cat="home"
+              role="tab"
+              aria-selected="false"
+            >
+              Home
+            </button>
+            <button
+              class="chip"
+              data-cat="accessories"
+              role="tab"
+              aria-selected="false"
+            >
+              Accessories
+            </button>
+            <button
+              class="chip"
+              data-cat="beauty"
+              role="tab"
+              aria-selected="false"
+            >
+              Beauty
+            </button>
+          </div>
+          <select class="sort" id="sortSelect" aria-label="Sort products">
+            <option value="relevance">Sort: Relevance</option>
+            <option value="price-asc">Price: Low → High</option>
+            <option value="price-desc">Price: High → Low</option>
+            <option value="name-asc">Name: A → Z</option>
+            <option value="name-desc">Name: Z → A</option>
+          </select>
+        </section>
+        <section class="grid" id="productGrid" aria-live="polite"></section>
+      </main>
       <main class="container">
         <div class="product">
           <div>
             <img
-              src="https://picsum.photos/seed/product/600/600"
+              src="https://picsum.photos/seed/lamp/600/600"
               alt="Product Image"
             />
           </div>
@@ -23,13 +105,14 @@
             <p class="price">₦35,000</p>
             <p>
               Experience rich sound quality with our latest wireless headphones.
-              Designed for comfort and style, with up to 24 hours of battery life.
+              Designed for comfort and style, with up to 24 hours of battery
+              life.
             </p>
             <a href="checkout.html" class="btn">Add to Cart</a>
           </div>
         </div>
       </main>
-      
+
       <div id="footer"></div>
     </div>
 
