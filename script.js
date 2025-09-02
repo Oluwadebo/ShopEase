@@ -318,70 +318,73 @@ const Cart = (() => {
     render();
   };
 
-  const render = () => {
-    const drawer = document.getElementById("cartDrawer");
-    const list = document.getElementById("cartList");
-    const subtotalEl = document.getElementById("subtotal");
-    const countEl = document.getElementById("cartCount");
-    if (!list || !subtotalEl || !countEl) return;
+const render = () => {
+  const list = document.getElementById("cartList");
+  const subtotalEl = document.getElementById("subtotal");
+  const countEl = document.getElementById("cartCount");
+  const summaryItems = document.getElementById("summaryItems"); // 👈 for summary section
 
+  // Always update cart badge in header (if it exists)
+  if (countEl) {
+    countEl.textContent = State.cart.reduce((s, i) => s + i.qty, 0);
+  }
+
+  // Only render cart list + subtotal if we are on cart page
+  if (list && subtotalEl) {
+    let subtotal = 0;
+
+    // Render main cart items
     list.innerHTML = State.cart
-      .map(
-        (it) => `
-      <div class="cart-item">
-        <img alt="${it.name}" src="${it.img}" />
-        <div>
-          <div style="font-weight:700">${it.name}</div>
-          <div style="color:var(--text-dim); font-size:14px">₦${it.price.toLocaleString()}</div>
-          <div class="qty" role="group">
-            <button aria-label="Decrease" onclick="Cart.changeQty('${
-              it.id
-            }',-1)">−</button>
-            <span aria-live="polite">${it.qty}</span>
-            <button aria-label="Increase" onclick="Cart.changeQty('${
-              it.id
-            }',1)">+</button>
+      .map((it) => {
+        const total = it.price * it.qty;
+        subtotal += total;
+        return `
+        <article class="cart-item">
+          <img alt="${it.name}" src="${it.img}" />
+          <div class="item-details">
+            <div class="item-name" style="font-weight:700">${it.name}</div>
+            <div style="color:var(--text-dim); font-size:14px">
+              ₦${it.price.toLocaleString()}
+            </div>
+            <div class="qty" role="group">
+              <button aria-label="Decrease" onclick="Cart.changeQty('${it.id}',-1)">−</button>
+              <span aria-live="polite">${it.qty}</span>
+              <button aria-label="Increase" onclick="Cart.changeQty('${it.id}',1)">+</button>
+            </div>
           </div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-weight:800">₦${(
-            it.price * it.qty
-          ).toLocaleString()}</div>
-          <button class="remove" onclick="Cart.remove('${
-            it.id
-          }')">Remove</button>
-        </div>
-      </div>
-    `
-      )
+          <div style="text-align:right">
+            <div style="font-weight:800">₦${total.toLocaleString()}</div>
+            <button class="remove" onclick="Cart.remove('${it.id}')">Remove</button>
+          </div>
+        </article>
+      `;
+      })
       .join("");
 
-    subtotalEl.textContent = `₦${State.cart
-      .reduce((s, i) => s + i.price * i.qty, 0)
-      .toLocaleString()}`;
-    countEl.textContent = State.cart.reduce((s, i) => s + i.qty, 0);
-  };
+    // Update subtotal
+    subtotalEl.textContent = `₦${subtotal.toLocaleString()}`;
 
-  const open = () => {
-    const drawer = document.getElementById("cartDrawer");
-    if (!drawer) return;
-    drawer.classList.add("open");
-    drawer.setAttribute("aria-hidden", "false");
-    State.cartOpen = true;
-    State.saveCartPanel();
-  };
+    // Render summary items (mini list)
+    if (summaryItems) {
+      summaryItems.innerHTML = State.cart
+        .map(
+          (it) => `
+        <div class="row" style="font-size:14px; margin-bottom:4px">
+          <span>${it.qty} × ${it.name}</span>
+          <span>₦${(it.price * it.qty).toLocaleString()}</span>
+        </div>
+      `
+        )
+        .join("");
+    }
+  }
+};
 
-  const close = () => {
-    const drawer = document.getElementById("cartDrawer");
-    if (!drawer) return;
-    drawer.classList.remove("open");
-    drawer.setAttribute("aria-hidden", "true");
-    State.cartOpen = false;
-    State.saveCartPanel();
-  };
 
-  return { add, remove, changeQty, render, open, close };
+
+  return { add, remove, changeQty, render };
 })();
+
 
 // MODULE 6: EVENT LISTENERS
 const Events = (() => {
@@ -435,10 +438,10 @@ const Events = (() => {
       });
 
     // Cart open/close
-    document.body.addEventListener("click", (e) => {
-      if (e.target.id === "openCart") Cart.open();
-      if (e.target.id === "closeCart") Cart.close();
-    });
+    // document.body.addEventListener("click", (e) => {
+    //   if (e.target.id === "openCart") Cart.open();
+    //   if (e.target.id === "closeCart") Cart.close();
+    // });
   };
 
   return { init };
@@ -459,7 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ProductRender.render();
     Cart.render();
-    if (State.cartOpen) Cart.open();
+    // if (State.cartOpen) Cart.open();
   });
 });
 
