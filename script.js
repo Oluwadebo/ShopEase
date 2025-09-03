@@ -186,14 +186,7 @@ const ProductRender = (() => {
   const cardHTML = (p) => `
     <article class="card" aria-label="${p.name}">
       <div class="thumb">
-        <div class="carousel">
-          ${p.images
-            .map(
-              (img, i) =>
-                `<img src="${img}" alt="${p.name} ${i + 1}" loading="lazy"/>`
-            )
-            .join("")}
-        </div>
+        <img src="${p.images[0]}" alt="${p.name}" loading="lazy"/>
         ${p.tag ? `<span class="badge-tag">${p.tag}</span>` : ""}
       </div>
       <div class="content">
@@ -211,57 +204,6 @@ const ProductRender = (() => {
     </article>
   `;
 
-  const setupCarousel = (carousel) => {
-    const imgs = carousel.querySelectorAll("img");
-    let index = 0,
-      intervalId = null;
-
-    const startHover = () => {
-      if (!intervalId && imgs.length > 1)
-        intervalId = setInterval(() => {
-          index = (index + 1) % imgs.length;
-          carousel.style.transform = `translateX(-${index * 100}%)`;
-        }, 1500);
-    };
-
-    const stopHover = () => {
-      clearInterval(intervalId);
-      intervalId = null;
-      index = 0;
-      carousel.style.transform = "translateX(0)";
-    };
-
-    carousel.addEventListener("mouseenter", () => {
-      if (window.innerWidth > 768) startHover();
-    });
-    carousel.addEventListener("mouseleave", stopHover);
-
-    let startX = 0,
-      isDragging = false;
-
-    carousel.addEventListener("touchstart", (e) => {
-      startX = e.touches[0].clientX;
-      isDragging = true;
-    });
-
-    carousel.addEventListener("touchmove", (e) => {
-      if (!isDragging) return;
-      const dx = e.touches[0].clientX - startX;
-      carousel.style.transform = `translateX(${
-        -index * 100 + (dx / carousel.offsetWidth) * 100
-      }%)`;
-    });
-
-    carousel.addEventListener("touchend", (e) => {
-      if (!isDragging) return;
-      const dx = e.changedTouches[0].clientX - startX;
-      if (dx < -30 && index < imgs.length - 1) index++;
-      if (dx > 30 && index > 0) index--;
-      carousel.style.transform = `translateX(-${index * 100}%)`;
-      isDragging = false;
-    });
-  };
-
   const render = () => {
     const grid = document.getElementById("productGrid");
     if (!grid) return;
@@ -277,7 +219,6 @@ const ProductRender = (() => {
       .forEach((btn) =>
         btn.addEventListener("click", () => Cart.add(btn.dataset.add))
       );
-    grid.querySelectorAll(".carousel").forEach(setupCarousel);
   };
 
   return { render };
@@ -318,73 +259,66 @@ const Cart = (() => {
     render();
   };
 
-const render = () => {
-  const list = document.getElementById("cartList");
-  const subtotalEl = document.getElementById("subtotal");
-  const countEl = document.getElementById("cartCount");
-  const summaryItems = document.getElementById("summaryItems"); // 👈 for summary section
+  const render = () => {
+    const list = document.getElementById("cartList");
+    const subtotalEl = document.getElementById("subtotal");
+    const countEl = document.getElementById("cartCount");
+    const summaryItems = document.getElementById("summaryItems");
 
-  // Always update cart badge in header (if it exists)
-  if (countEl) {
-    countEl.textContent = State.cart.reduce((s, i) => s + i.qty, 0);
-  }
-
-  // Only render cart list + subtotal if we are on cart page
-  if (list && subtotalEl) {
-    let subtotal = 0;
-
-    // Render main cart items
-    list.innerHTML = State.cart
-      .map((it) => {
-        const total = it.price * it.qty;
-        subtotal += total;
-        return `
-        <article class="cart-item">
-          <img alt="${it.name}" src="${it.img}" />
-          <div class="item-details">
-            <div class="item-name" style="font-weight:700">${it.name}</div>
-            <div style="color:var(--text-dim); font-size:14px">
-              ₦${it.price.toLocaleString()}
-            </div>
-            <div class="qty" role="group">
-              <button aria-label="Decrease" onclick="Cart.changeQty('${it.id}',-1)">−</button>
-              <span aria-live="polite">${it.qty}</span>
-              <button aria-label="Increase" onclick="Cart.changeQty('${it.id}',1)">+</button>
-            </div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-weight:800">₦${total.toLocaleString()}</div>
-            <button class="remove" onclick="Cart.remove('${it.id}')">Remove</button>
-          </div>
-        </article>
-      `;
-      })
-      .join("");
-
-    // Update subtotal
-    subtotalEl.textContent = `₦${subtotal.toLocaleString()}`;
-
-    // Render summary items (mini list)
-    if (summaryItems) {
-      summaryItems.innerHTML = State.cart
-        .map(
-          (it) => `
-        <div class="row" style="font-size:14px; margin-bottom:4px">
-          <span>${it.qty} × ${it.name}</span>
-          <span>₦${(it.price * it.qty).toLocaleString()}</span>
-        </div>
-      `
-        )
-        .join("");
+    // Update cart badge
+    if (countEl) {
+      countEl.textContent = State.cart.reduce((s, i) => s + i.qty, 0);
     }
-  }
-};
 
+    if (list && subtotalEl) {
+      let subtotal = 0;
 
+      list.innerHTML = State.cart
+        .map((it) => {
+          const total = it.price * it.qty;
+          subtotal += total;
+          return `
+          <article class="cart-item">
+            <img alt="${it.name}" src="${it.img}" />
+            <div class="item-details">
+              <div class="item-name" style="font-weight:700">${it.name}</div>
+              <div style="color:var(--text-dim); font-size:14px">
+                ₦${it.price.toLocaleString()}
+              </div>
+              <div class="qty" role="group">
+                <button aria-label="Decrease" onclick="Cart.changeQty('${it.id}',-1)">−</button>
+                <span aria-live="polite">${it.qty}</span>
+                <button aria-label="Increase" onclick="Cart.changeQty('${it.id}',1)">+</button>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800">₦${total.toLocaleString()}</div>
+              <button class="remove" onclick="Cart.remove('${it.id}')">Remove</button>
+            </div>
+          </article>
+        `;
+        })
+        .join("");
+
+      subtotalEl.textContent = `₦${subtotal.toLocaleString()}`;
+
+      if (summaryItems) {
+        summaryItems.innerHTML = State.cart
+          .map(
+            (it) => `
+          <div class="row" style="font-size:14px; margin-bottom:4px">
+            <span>${it.qty} × ${it.name}</span>
+            <span>₦${(it.price * it.qty).toLocaleString()}</span>
+          </div>
+        `
+          )
+          .join("");
+      }
+    }
+  };
 
   return { add, remove, changeQty, render };
 })();
-
 
 // MODULE 6: EVENT LISTENERS
 const Events = (() => {
@@ -393,7 +327,6 @@ const Events = (() => {
     const search = document.getElementById("searchInput");
     const sort = document.getElementById("sortSelect");
 
-    // Category filter
     if (chips) {
       chips.addEventListener("click", (e) => {
         const btn = e.target.closest(".chip");
@@ -409,7 +342,6 @@ const Events = (() => {
       });
     }
 
-    // Search input
     if (search) {
       search.addEventListener("input", () => {
         State.query = search.value.trim().toLowerCase();
@@ -417,7 +349,6 @@ const Events = (() => {
       });
     }
 
-    // Sort select
     if (sort) {
       sort.addEventListener("change", () => {
         State.sort = sort.value;
@@ -425,7 +356,6 @@ const Events = (() => {
       });
     }
 
-    // Shop now scroll
     const shopBtn = document.getElementById("shopNow");
     if (shopBtn)
       shopBtn.addEventListener("click", () => {
@@ -436,12 +366,6 @@ const Events = (() => {
           behavior: "smooth",
         });
       });
-
-    // Cart open/close
-    // document.body.addEventListener("click", (e) => {
-    //   if (e.target.id === "openCart") Cart.open();
-    //   if (e.target.id === "closeCart") Cart.close();
-    // });
   };
 
   return { init };
@@ -450,10 +374,8 @@ const Events = (() => {
 // MODULE 7: INITIALIZE PAGE
 document.addEventListener("DOMContentLoaded", () => {
   HeaderFooter.init().then(() => {
-    // Header & Footer fully loaded
     Events.init();
 
-    // Set default active category
     const allChip = document.querySelector('.chip[data-cat="all"]');
     if (allChip) {
       allChip.classList.add("active");
@@ -462,9 +384,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ProductRender.render();
     Cart.render();
-    // if (State.cartOpen) Cart.open();
+
+    if (document.getElementById("productDetail")) {
+      ProductDetailPage.renderDetail(ProductData.PRODUCTS[4]);
+    }
+
+    // ✅ Initialize Checkout only on checkout page
+    if (document.getElementById("checkoutForm")) {
+      Checkout.init();
+    }
   });
 });
+
 
 // MODULE 8: PRODUCT DETAIL PAGE
 const ProductDetailPage = (() => {
@@ -473,20 +404,15 @@ const ProductDetailPage = (() => {
   const infoContainer = document.getElementById("productInfo");
   const similarContainer = document.getElementById("similarProducts");
 
-  let currentProduct = ProductData.PRODUCTS[0];
-  let intervalId = null;
-
   const renderDetail = (product) => {
-    currentProduct = product;
-
-    // Images carousel
+    // One main image only
     imagesContainer.innerHTML = `
-    <img src="${product.images[0]}" 
-         alt="${product.name}" 
-         class="active" 
-         loading="lazy"/>
-  `;
-    // Info
+      <img src="${product.images[0]}" 
+           alt="${product.name}" 
+           class="active" 
+           loading="lazy"/>
+    `;
+
     infoContainer.innerHTML = `
       ${product.tag ? `<span class="badge-tag">${product.tag}</span>` : ""}
       <h1>${product.name}</h1>
@@ -498,9 +424,9 @@ const ProductDetailPage = (() => {
             : ""
         }
       </div>
-      <button class="checkout-add-btn" data-add="${
-        product.id
-      }">Add to Cart</button>
+      <button class="checkout-add-btn" data-add="${product.id}">
+        Add to Cart
+      </button>
     `;
 
     const addBtn = infoContainer.querySelector(".checkout-add-btn");
@@ -521,17 +447,17 @@ const ProductDetailPage = (() => {
       card.className = "card";
       card.innerHTML = `
         <img src="${p.images[0]}" alt="${p.name}">
-          <div class="content">
-        <div class="title">${p.name}</div>
-        <div class="price-row">
-          <div class="price">₦${p.price.toLocaleString()}</div>
-          ${
-            p.oldPrice
-              ? `<div class="old">₦${p.oldPrice.toLocaleString()}</div>`
-              : ""
-          }
+        <div class="content">
+          <div class="title">${p.name}</div>
+          <div class="price-row">
+            <div class="price">₦${p.price.toLocaleString()}</div>
+            ${
+              p.oldPrice
+                ? `<div class="old">₦${p.oldPrice.toLocaleString()}</div>`
+                : ""
+            }
+          </div>
         </div>
-      </div>
       `;
       card.addEventListener("click", () => {
         renderDetail(p);
@@ -547,8 +473,61 @@ const ProductDetailPage = (() => {
   return { renderDetail };
 })();
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (document.getElementById("productDetail")) {
-    ProductDetailPage.renderDetail(ProductData.PRODUCTS[4]);
-  }
-});
+// MODULE 9: CHECKOUT PAGE
+const Checkout = (() => {
+  const renderSummary = () => {
+    const listEl = document.getElementById("summaryList");
+    const subtotalEl = document.getElementById("subtotal");
+    const totalEl = document.getElementById("grandTotal");
+
+    if (!listEl || !subtotalEl || !totalEl) return;
+
+    let subtotal = 0;
+    listEl.innerHTML = State.cart
+      .map((item) => {
+        const total = item.price * item.qty;
+        subtotal += total;
+        return `
+          <article class="summary-item">
+            <img src="${item.img}" alt="${item.name}" />
+            <div>
+              <p>${item.name}</p>
+              <small>₦${item.price.toLocaleString()} × ${item.qty}</small>
+            </div>
+            <strong>₦${total.toLocaleString()}</strong>
+          </article>
+        `;
+      })
+      .join("");
+
+    subtotalEl.textContent = "₦" + subtotal.toLocaleString();
+    totalEl.textContent = "₦" + subtotal.toLocaleString();
+  };
+
+  const handleForm = () => {
+    const form = document.getElementById("checkoutForm");
+    if (!form) return;
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const data = Object.fromEntries(new FormData(form).entries());
+      const order = {
+        customer: data,
+        cart: State.cart,
+        total: document.getElementById("grandTotal").textContent,
+        date: new Date().toISOString(),
+      };
+
+      localStorage.setItem("ORDER_V1", JSON.stringify(order));
+      window.location.href = "payment.html";
+    });
+  };
+
+  const init = () => {
+    renderSummary();
+    handleForm();
+  };
+
+  return { init };
+})();
