@@ -1,18 +1,24 @@
 // MODULE 1: HEADER & FOOTER
 const HeaderFooter = (() => {
-  const load = (id, url) => {
+  const load = async (id, url) => {
     const el = document.getElementById(id);
-    if (!el) return Promise.resolve();
-    return fetch(url)
-      .then((res) => res.text())
-      .then((html) => {
-        el.innerHTML = html;
-        if (id === "footer") {
-          const yearEl = document.getElementById("year");
-          if (yearEl) yearEl.textContent = new Date().getFullYear();
-        }
-      });
+    if (!el) return;
+
+    try {
+      const res = await fetch(url);
+      const html = await res.text();
+      el.innerHTML = html;
+
+      // Auto-update year in footer
+      if (id === "footer") {
+        const yearEl = document.getElementById("year");
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+      }
+    } catch (err) {
+      console.error(`Error loading ${url}:`, err);
+    }
   };
+
   return {
     init: () =>
       Promise.all([
@@ -139,12 +145,8 @@ const State = {
   category: "all",
   sort: "relevance",
   cart: JSON.parse(localStorage.getItem("CART_V1") || "[]"),
-  cartOpen: localStorage.getItem("CART_PANEL_OPEN") === "true",
   saveCart() {
     localStorage.setItem("CART_V1", JSON.stringify(this.cart));
-  },
-  saveCartPanel() {
-    localStorage.setItem("CART_PANEL_OPEN", this.cartOpen);
   },
 };
 
@@ -184,36 +186,57 @@ const ProductRender = (() => {
   };
 
   const cardHTML = (p) => `
-    <article class="card" aria-label="${p.name}">
-      <div class="thumb">
-        <img src="${p.images[0]}" alt="${p.name}" loading="lazy"/>
-        ${p.tag ? `<span class="badge-tag">${p.tag}</span>` : ""}
+  <article class="card" aria-label="${p.name}">
+    <a href="product.html?id=${p.id}" class="thumb">
+      <img src="${p.images[0]}" alt="${p.name}" loading="lazy"/>
+      ${p.tag ? `<span class="badge-tag">${p.tag}</span>` : ""}
+    </a>
+    <div class="content">
+      <a href="product.html?id=${p.id}" class="title">${p.name}</a>
+      <div class="price-row">
+        <div class="price">₦${p.price.toLocaleString()}</div>
+        ${
+          p.oldPrice
+            ? `<div class="old">₦${p.oldPrice.toLocaleString()}</div>`
+            : ""
+        }
       </div>
-      <div class="content">
-        <div class="title">${p.name}</div>
-        <div class="price-row">
-          <div class="price">₦${p.price.toLocaleString()}</div>
-          ${
-            p.oldPrice
-              ? `<div class="old">₦${p.oldPrice.toLocaleString()}</div>`
-              : ""
-          }
-        </div>
-        <button class="add-btn" data-add="${p.id}">Add to cart</button>
+      <button class="add-btn" data-add="${p.id}">Add to cart</button>
+    </div>
+  </article>
+`;
+  const cardpHTML = (p) => `
+  <article class="card" aria-label="${p.name}">
+    <a href="product.html?id=${p.id}" class="">
+      <img src="${p.images[0]}" alt="${p.name}" loading="lazy"/>
+      ${p.tag ? `<span class="badge-tag">${p.tag}</span>` : ""}
+    </a>
+    <div class="content">
+      <a href="product.html?id=${p.id}" class="title">${p.name}</a>
+      <div class="price-row">
+        <div class="price">₦${p.price.toLocaleString()}</div>
+        ${
+          p.oldPrice
+            ? `<div class="old">₦${p.oldPrice.toLocaleString()}</div>`
+            : ""
+        }
       </div>
-    </article>
-  `;
+      <button class="add-btn" data-add="${p.id}">Add to cart</button>
+    </div>
+  </article>
+`;
 
+  // ✅ render product grid (homepage / shop)
   const render = () => {
-    const grid = document.getElementById("productGrid");
+    const grid =
+      document.getElementById("productGrid") ||
+      document.getElementById("similarProducts");
     if (!grid) return;
-
     const filtered = ProductData.PRODUCTS.filter(
       (p) => State.category === "all" || p.category === State.category
     ).filter((p) => p.name.toLowerCase().includes(State.query));
     const sorted = sortItems(filtered, State.sort);
     grid.innerHTML = sorted.map(cardHTML).join("");
-
     grid
       .querySelectorAll("[data-add]")
       .forEach((btn) =>
@@ -221,7 +244,60 @@ const ProductRender = (() => {
       );
   };
 
-  return { render };
+  // ✅ render detail page
+  const renderDetail = (id) => {
+    const product = ProductData.PRODUCTS.find((p) => p.id === id);
+    if (!product) return;
+
+    const imagesEl = document.getElementById("productImages");
+    const infoEl = document.getElementById("productInfo");
+
+    if (imagesEl) {
+      imagesEl.innerHTML = product.images
+        .map(
+          (src, i) =>
+            `<img src="${src}" alt="${product.name} ${i + 1}" ${
+              i === 0 ? "" : "loading='lazy'"
+            } />`
+        )
+        .join("");
+    }
+
+    if (infoEl) {
+      infoEl.innerHTML = `
+        <h1>${product.name}</h1>
+        <div class="price-row">
+          <div class="price">₦${product.price.toLocaleString()}</div>
+          ${
+            product.oldPrice
+              ? `<div class="old">₦${product.oldPrice.toLocaleString()}</div>`
+              : ""
+          }
+        </div>
+        <p>Category: ${product.category}</p>
+        <p><span class="badge-tag">${product.tag}</span></p>
+        <button class="add-btn" onclick="Cart.add('${
+          product.id
+        }')">Add to Cart</button>
+      `;
+    }
+
+    // Render similar products
+    const similar = ProductData.PRODUCTS.filter(
+      (p) => p.category === product.category && p.id !== product.id
+    );
+    const similarEl = document.getElementById("similarProducts");
+    if (similarEl) {
+      similarEl.innerHTML = similar.map(cardpHTML).join("");
+      similarEl
+        .querySelectorAll("[data-add]")
+        .forEach((btn) =>
+          btn.addEventListener("click", () => Cart.add(btn.dataset.add))
+        );
+    }
+  };
+
+  return { render, renderDetail };
 })();
 
 // MODULE 5: CART MANAGEMENT
@@ -232,15 +308,9 @@ const Cart = (() => {
     const p = ProductData.PRODUCTS.find((p) => p.id === id);
     if (!p) return;
     const existing = find(id);
-    if (existing) existing.qty++;
-    else
-      State.cart.push({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        img: p.images[0],
-        qty: 1,
-      });
+    existing
+      ? existing.qty++
+      : State.cart.push({ ...p, qty: 1, img: p.images[0] });
     State.saveCart();
     render();
   };
@@ -264,223 +334,159 @@ const Cart = (() => {
     const subtotalEl = document.getElementById("subtotal");
     const countEl = document.getElementById("cartCount");
     const summaryItems = document.getElementById("summaryItems");
+    const checkoutBtn = document.getElementById("checkoutBtn");
 
-    // Update cart badge
-    if (countEl) {
-      countEl.textContent = State.cart.reduce((s, i) => s + i.qty, 0);
-    }
+    let subtotal = 0;
 
-    if (list && subtotalEl) {
-      let subtotal = 0;
-
+    if (list) {
       list.innerHTML = State.cart
         .map((it) => {
           const total = it.price * it.qty;
           subtotal += total;
           return `
-          <article class="cart-item">
-            <img alt="${it.name}" src="${it.img}" />
-            <div class="item-details">
-              <div class="item-name" style="font-weight:700">${it.name}</div>
-              <div style="color:var(--text-dim); font-size:14px">
-                ₦${it.price.toLocaleString()}
-              </div>
-              <div class="qty" role="group">
-                <button aria-label="Decrease" onclick="Cart.changeQty('${it.id}',-1)">−</button>
-                <span aria-live="polite">${it.qty}</span>
-                <button aria-label="Increase" onclick="Cart.changeQty('${it.id}',1)">+</button>
-              </div>
+        <article class="cart-item">
+          <img src="${it.img}" alt="${it.name}" />
+          <div class="item-details">
+            <div class="item-name">${it.name}</div>
+            <small>₦${it.price.toLocaleString()}</small>
+            <div class="qty">
+              <button onclick="Cart.changeQty('${it.id}',-1)">−</button>
+              <span>${it.qty}</span>
+              <button onclick="Cart.changeQty('${it.id}',1)">+</button>
             </div>
-            <div style="text-align:right">
-              <div style="font-weight:800">₦${total.toLocaleString()}</div>
-              <button class="remove" onclick="Cart.remove('${it.id}')">Remove</button>
-            </div>
-          </article>
-        `;
+          </div>
+          <div>
+            <strong>₦${total.toLocaleString()}</strong>
+            <button class="remove" onclick="Cart.remove('${
+              it.id
+            }')">Remove</button>
+          </div>
+        </article>
+      `;
         })
         .join("");
+    }
 
-      subtotalEl.textContent = `₦${subtotal.toLocaleString()}`;
+    if (subtotalEl) subtotalEl.textContent = "₦" + subtotal.toLocaleString();
+    if (countEl)
+      countEl.textContent = State.cart.reduce((s, i) => s + i.qty, 0);
 
-      if (summaryItems) {
-        summaryItems.innerHTML = State.cart
+    if (summaryItems) {
+      if (State.cart.length === 0) {
+        summaryItems.innerHTML = "<p>Your cart is empty.</p>";
+      } else {
+        const rows = State.cart
           .map(
             (it) => `
-          <div class="row" style="font-size:14px; margin-bottom:4px">
-            <span>${it.qty} × ${it.name}</span>
-            <span>₦${(it.price * it.qty).toLocaleString()}</span>
-          </div>
-        `
+      <tr>
+        <td>${it.qty}</td>
+        <td>${it.name}</td>
+        <td>₦${it.price.toLocaleString()}</td>
+        <td>₦${(it.price * it.qty).toLocaleString()}</td>
+      </tr>
+    `
           )
           .join("");
+
+        const grandTotal = State.cart.reduce(
+          (sum, it) => sum + it.price * it.qty,
+          0
+        );
+
+        summaryItems.innerHTML = `
+    <table border="0" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse; text-align:left;">
+      <thead>
+        <tr>
+          <th>Qty</th>
+          <th>Item</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+        <tr style="font-weight: bold;">
+          <td colspan="3" style="text-align:center;">Grand Total</td>
+          <td>₦${grandTotal.toLocaleString()}</td>
+        </tr><br>
+        <tr style="font-weight: bold;">
+          <td colspan="1" style="text-align:
+          center;">Shipping</td>
+          <td colspan="3" style="text-align:
+          right;">Calculated at checkout</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
       }
+    }
+
+    // ✅ Disable or enable checkout button
+    if (checkoutBtn) {
+      checkoutBtn.disabled = State.cart.length === 0;
+      checkoutBtn.style.opacity = State.cart.length === 0 ? "0.5" : "1";
+      checkoutBtn.style.cursor =
+        State.cart.length === 0 ? "not-allowed" : "pointer";
     }
   };
 
   return { add, remove, changeQty, render };
 })();
 
-// MODULE 6: EVENT LISTENERS
+// MODULE 6: EVENTS
 const Events = (() => {
   const init = () => {
-    const chips = document.getElementById("categoryChips");
     const search = document.getElementById("searchInput");
     const sort = document.getElementById("sortSelect");
+    const shopBtn = document.getElementById("shopNow");
+    const chips = document.querySelectorAll("#categoryChips .chip");
 
-    if (chips) {
-      chips.addEventListener("click", (e) => {
-        const btn = e.target.closest(".chip");
-        if (!btn) return;
-        chips.querySelectorAll(".chip").forEach((c) => {
-          c.classList.remove("active");
-          c.setAttribute("aria-selected", "false");
-        });
-        btn.classList.add("active");
-        btn.setAttribute("aria-selected", "true");
-        State.category = btn.dataset.cat;
-        ProductRender.render();
-      });
-    }
-
-    if (search) {
+    if (search)
       search.addEventListener("input", () => {
         State.query = search.value.trim().toLowerCase();
         ProductRender.render();
       });
-    }
 
-    if (sort) {
+    if (sort)
       sort.addEventListener("change", () => {
         State.sort = sort.value;
         ProductRender.render();
       });
-    }
 
-    const shopBtn = document.getElementById("shopNow");
     if (shopBtn)
       shopBtn.addEventListener("click", () => {
         const grid = document.getElementById("productGrid");
-        if (!grid) return;
-        window.scrollTo({
-          top: grid.offsetTop - 80,
-          behavior: "smooth",
+        if (grid)
+          window.scrollTo({ top: grid.offsetTop - 80, behavior: "smooth" });
+      });
+
+    // ✅ handle category chips
+    if (chips.length) {
+      chips.forEach((chip) => {
+        chip.addEventListener("click", () => {
+          // remove active class
+          chips.forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+
+          // update state
+          State.category = chip.dataset.cat;
+          ProductRender.render();
         });
       });
+    }
   };
 
   return { init };
 })();
 
-// MODULE 7: INITIALIZE PAGE
-document.addEventListener("DOMContentLoaded", () => {
-  HeaderFooter.init().then(() => {
-    Events.init();
 
-    const allChip = document.querySelector('.chip[data-cat="all"]');
-    if (allChip) {
-      allChip.classList.add("active");
-      allChip.setAttribute("aria-selected", "true");
-    }
-
-    ProductRender.render();
-    Cart.render();
-
-    if (document.getElementById("productDetail")) {
-      ProductDetailPage.renderDetail(ProductData.PRODUCTS[4]);
-    }
-
-    // ✅ Initialize Checkout only on checkout page
-    if (document.getElementById("checkoutForm")) {
-      Checkout.init();
-    }
-  });
-});
-
-
-// MODULE 8: PRODUCT DETAIL PAGE
-const ProductDetailPage = (() => {
-  const detailSection = document.getElementById("productDetail");
-  const imagesContainer = document.getElementById("productImages");
-  const infoContainer = document.getElementById("productInfo");
-  const similarContainer = document.getElementById("similarProducts");
-
-  const renderDetail = (product) => {
-    // One main image only
-    imagesContainer.innerHTML = `
-      <img src="${product.images[0]}" 
-           alt="${product.name}" 
-           class="active" 
-           loading="lazy"/>
-    `;
-
-    infoContainer.innerHTML = `
-      ${product.tag ? `<span class="badge-tag">${product.tag}</span>` : ""}
-      <h1>${product.name}</h1>
-      <div class="price-row">
-        <div class="price">₦${product.price.toLocaleString()}</div>
-        ${
-          product.oldPrice
-            ? `<div class="old">₦${product.oldPrice.toLocaleString()}</div>`
-            : ""
-        }
-      </div>
-      <button class="checkout-add-btn" data-add="${product.id}">
-        Add to Cart
-      </button>
-    `;
-
-    const addBtn = infoContainer.querySelector(".checkout-add-btn");
-    if (addBtn) addBtn.addEventListener("click", () => Cart.add(product.id));
-
-    renderSimilar(product);
-  };
-
-  const renderSimilar = (product) => {
-    similarContainer.innerHTML = "";
-    const similar = ProductData.PRODUCTS.filter(
-      (p) =>
-        p.id !== product.id &&
-        (p.category === product.category || p.tag === product.tag)
-    );
-    similar.forEach((p) => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <img src="${p.images[0]}" alt="${p.name}">
-        <div class="content">
-          <div class="title">${p.name}</div>
-          <div class="price-row">
-            <div class="price">₦${p.price.toLocaleString()}</div>
-            ${
-              p.oldPrice
-                ? `<div class="old">₦${p.oldPrice.toLocaleString()}</div>`
-                : ""
-            }
-          </div>
-        </div>
-      `;
-      card.addEventListener("click", () => {
-        renderDetail(p);
-        window.scrollTo({
-          top: detailSection.offsetTop - 60,
-          behavior: "smooth",
-        });
-      });
-      similarContainer.appendChild(card);
-    });
-  };
-
-  return { renderDetail };
-})();
-
-// MODULE 9: CHECKOUT PAGE
+// MODULE 7: CHECKOUT
 const Checkout = (() => {
   const renderSummary = () => {
     const listEl = document.getElementById("summaryList");
     const subtotalEl = document.getElementById("subtotal");
     const totalEl = document.getElementById("grandTotal");
-
-    if (!listEl || !subtotalEl || !totalEl) return;
+    if (!listEl) return;
 
     let subtotal = 0;
     listEl.innerHTML = State.cart
@@ -488,20 +494,19 @@ const Checkout = (() => {
         const total = item.price * item.qty;
         subtotal += total;
         return `
-          <article class="summary-item">
-            <img src="${item.img}" alt="${item.name}" />
-            <div>
-              <p>${item.name}</p>
-              <small>₦${item.price.toLocaleString()} × ${item.qty}</small>
-            </div>
-            <strong>₦${total.toLocaleString()}</strong>
-          </article>
-        `;
+        <article class="summary-item">
+          <img src="${item.img}" alt="${item.name}" />
+          <p>${item.name} <small>₦${item.price.toLocaleString()} × ${
+          item.qty
+        }</small></p>
+          <strong>₦${total.toLocaleString()}</strong>
+        </article>
+      `;
       })
       .join("");
 
-    subtotalEl.textContent = "₦" + subtotal.toLocaleString();
-    totalEl.textContent = "₦" + subtotal.toLocaleString();
+    if (subtotalEl) subtotalEl.textContent = "₦" + subtotal.toLocaleString();
+    if (totalEl) totalEl.textContent = "₦" + subtotal.toLocaleString();
   };
 
   const handleForm = () => {
@@ -510,11 +515,12 @@ const Checkout = (() => {
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-
       const data = Object.fromEntries(new FormData(form).entries());
+
       const order = {
+        id: "ORD-" + Date.now(),
         customer: data,
-        cart: State.cart,
+        items: State.cart,
         total: document.getElementById("grandTotal").textContent,
         date: new Date().toISOString(),
       };
@@ -524,10 +530,96 @@ const Checkout = (() => {
     });
   };
 
-  const init = () => {
-    renderSummary();
-    handleForm();
+  return {
+    init: () => {
+      renderSummary();
+      handleForm();
+    },
+  };
+})();
+
+// MODULE 8: PAYMENT
+const Payment = (() => {
+  const render = () => {
+    const order = JSON.parse(localStorage.getItem("ORDER_V1") || "null");
+    if (!order) return (window.location.href = "checkout.html");
+
+    const summaryEl = document.getElementById("paymentSummary");
+    const customerEl = document.getElementById("customerInfo");
+
+    if (summaryEl) {
+      summaryEl.innerHTML =
+        order.items
+          .map(
+            (it) =>
+              `<div class="row"><span>${it.qty} × ${it.name}</span><span>₦${(
+                it.price * it.qty
+              ).toLocaleString()}</span></div>`
+          )
+          .join("") +
+        `<div class="row total"><strong>Total:</strong><strong>${order.total}</strong></div>`;
+    }
+
+    if (customerEl) {
+      customerEl.innerHTML = `
+        <p><strong>Name:</strong> ${order.customer.name || ""}</p>
+        <p><strong>Email:</strong> ${order.customer.email || ""}</p>
+        <p><strong>Phone:</strong> ${order.customer.phone || ""}</p>
+        <p><strong>Address:</strong> ${order.customer.address || ""}</p>
+      `;
+    }
   };
 
-  return { init };
+  const handlePayment = () => {
+    const form = document.getElementById("paymentForm");
+    const mess = document.getElementById("paymentmethod");
+    if (!form) return;
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const method = form.querySelector("input[name=payment]:checked");
+      // if (!method) return alert("Select a payment method");
+      if (!method) {
+        mess.style.color = "red";
+        mess.textContent =
+          "⚠️ Please select a payment method before continuing.";
+        return;
+      }
+
+      const paymentData = {
+        method: method.value,
+        status: "Pending",
+        date: new Date().toISOString(),
+        order: JSON.parse(localStorage.getItem("ORDER_V1")),
+      };
+
+      localStorage.setItem("PAYMENT_V1", JSON.stringify(paymentData));
+      State.cart = [];
+      State.saveCart();
+      window.location.href = "thankyou.html";
+    });
+  };
+
+  return {
+    init: () => {
+      render();
+      handlePayment();
+    },
+  };
 })();
+
+// INIT APP
+document.addEventListener("DOMContentLoaded", () => {
+  HeaderFooter.init().then(() => {
+    Events.init();
+    ProductRender.render();
+    Cart.render();
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+    if (productId) {
+      ProductRender.renderDetail(productId);
+    }
+    if (document.getElementById("checkoutForm")) Checkout.init();
+    if (document.getElementById("paymentForm")) Payment.init();
+  });
+});
