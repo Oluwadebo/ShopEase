@@ -226,7 +226,6 @@ const ProductRender = (() => {
   </article>
 `;
 
-  // ✅ render product grid (homepage / shop)
   const render = () => {
     const grid =
       document.getElementById("productGrid") ||
@@ -244,7 +243,6 @@ const ProductRender = (() => {
       );
   };
 
-  // ✅ render detail page
   const renderDetail = (id) => {
     const product = ProductData.PRODUCTS.find((p) => p.id === id);
     if (!product) return;
@@ -373,7 +371,7 @@ const Cart = (() => {
 
     if (summaryItems) {
       if (State.cart.length === 0) {
-        summaryItems.innerHTML = "<p>Your cart is empty.</p>";
+        summaryItems.innerHTML = "<h3>Your cart is empty.</h3>";
       } else {
         const rows = State.cart
           .map(
@@ -482,57 +480,31 @@ const Events = (() => {
 
 // MODULE 7: CHECKOUT
 const Checkout = (() => {
-  const renderSummary = () => {
-    const listEl = document.getElementById("summaryList");
-    const subtotalEl = document.getElementById("subtotal");
-    const totalEl = document.getElementById("grandTotal");
-    if (!listEl) return;
+   const handleForm = () => {
+  const form = document.getElementById("checkoutForm");
+  if (!form) return;
 
-    let subtotal = 0;
-    listEl.innerHTML = State.cart
-      .map((item) => {
-        const total = item.price * item.qty;
-        subtotal += total;
-        return `
-        <article class="summary-item">
-          <img src="${item.img}" alt="${item.name}" />
-          <p>${item.name} <small>₦${item.price.toLocaleString()} × ${
-          item.qty
-        }</small></p>
-          <strong>₦${total.toLocaleString()}</strong>
-        </article>
-      `;
-      })
-      .join("");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form).entries());
 
-    if (subtotalEl) subtotalEl.textContent = "₦" + subtotal.toLocaleString();
-    if (totalEl) totalEl.textContent = "₦" + subtotal.toLocaleString();
-  };
+    const order = {
+      id: "ORD-" + Date.now(),
+      customer: data,
+      items: State.cart,
+      total: "₦" + State.cart.reduce((sum, it) => sum + it.price * it.qty, 0).toLocaleString(),
+      date: new Date().toISOString(),
+    };
 
-  const handleForm = () => {
-    const form = document.getElementById("checkoutForm");
-    if (!form) return;
+    localStorage.setItem("ORDER_V1", JSON.stringify(order));
+    window.location.href = "payment.html";
+  });
+};
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form).entries());
-
-      const order = {
-        id: "ORD-" + Date.now(),
-        customer: data,
-        items: State.cart,
-        total: document.getElementById("grandTotal").textContent,
-        date: new Date().toISOString(),
-      };
-
-      localStorage.setItem("ORDER_V1", JSON.stringify(order));
-      window.location.href = "payment.html";
-    });
-  };
 
   return {
     init: () => {
-      renderSummary();
+      // renderSummary();
       handleForm();
     },
   };
