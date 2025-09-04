@@ -419,7 +419,6 @@ const Cart = (() => {
       }
     }
 
-    // ✅ Disable or enable checkout button
     if (checkoutBtn) {
       checkoutBtn.disabled = State.cart.length === 0;
       checkoutBtn.style.opacity = State.cart.length === 0 ? "0.5" : "1";
