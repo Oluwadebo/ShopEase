@@ -7,54 +7,48 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- HEADER -->
-    <div id="header"></div>
+    <div>
+      <div id="header"></div>
 
-    <main class="container" style="max-width:900px; margin:40px auto;">
-      <h1>Complete Your Payment</h1>
+      <main class="container" style="max-width: 900px; margin: 40px auto">
+        <h1 class="cart-summary">Complete Your Payment</h1>
 
-      <section class="checkout-layout">
-        <!-- LEFT: Customer Info & Payment -->
-        <div class="checkout-left">
-          <h2>Customer Info</h2>
-          <div id="customerInfo" class="box"></div>
+        <section class="checkout-layout">
+          <div class="cart-summary checkout-left">
+            <h2>Customer Info</h2>
+            <div id="customerInfo" class="box"></div>
 
-          <h2>Payment Method</h2>
-          <form id="paymentForm" class="box">
-            <h4 id="paymentmethod">sd</h4>
-            <label>
-              <input type="radio" name="payment" value="Card Payment" />
-              Pay with Card (Visa / Mastercard / Verve)
-            </label>
-            <br />
-            <label>
-              <input type="radio" name="payment" value="Bank Transfer" />
-              Direct Bank Transfer
-            </label>
-            <br />
-            <label>
-              <input type="radio" name="payment" value="Cash on Delivery" />
-              Cash on Delivery
-            </label>
-            <br /><br />
-            <button type="submit" class="checkout">
-              Confirm Payment →
-            </button>
-          </form>
-        </div>
+            <h2>Payment Method</h2>
+            <form id="paymentForm" class="box">
+              <h4 id="paymentmethod"></h4>
+              <label>
+                <input type="radio" name="payment" value="Card Payment" />
+                Pay with Card (Visa / Mastercard / Verve)
+              </label>
+              <br />
+              <label>
+                <input type="radio" name="payment" value="Bank Transfer" />
+                Direct Bank Transfer
+              </label>
+              <br />
+              <label>
+                <input type="radio" name="payment" value="Cash on Delivery" />
+                Cash on Delivery
+              </label>
+              <br /><br />
+              <button type="submit" class="checkout">Confirm Payment →</button>
+            </form>
+          </div>
 
-        <!-- RIGHT: Order Summary -->
-        <aside class="checkout-right">
-          <h2>Order Summary</h2>
-          <div id="paymentSummary" class="box"></div>
-        </aside>
-      </section>
-    </main>
+          <aside class="cart-summary">
+            <h2>Order Summary</h2>
+            <div id="paymentSummary" class=""></div>
+          </aside>
+        </section>
+      </main>
 
-    <!-- FOOTER -->
-    <div id="footer"></div>
-
-    <!-- JS -->
+      <div id="footer"></div>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>

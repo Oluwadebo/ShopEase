@@ -406,7 +406,7 @@ const Cart = (() => {
         <tr style="font-weight: bold;">
           <td colspan="3" style="text-align:center;">Grand Total</td>
           <td>₦${grandTotal.toLocaleString()}</td>
-        </tr><br>
+        </tr>
         <tr style="font-weight: bold;">
           <td colspan="1" style="text-align:
           center;">Shipping</td>
@@ -477,30 +477,32 @@ const Events = (() => {
   return { init };
 })();
 
-
 // MODULE 7: CHECKOUT
 const Checkout = (() => {
-   const handleForm = () => {
-  const form = document.getElementById("checkoutForm");
-  if (!form) return;
+  const handleForm = () => {
+    const form = document.getElementById("checkoutForm");
+    if (!form) return;
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
 
-    const order = {
-      id: "ORD-" + Date.now(),
-      customer: data,
-      items: State.cart,
-      total: "₦" + State.cart.reduce((sum, it) => sum + it.price * it.qty, 0).toLocaleString(),
-      date: new Date().toISOString(),
-    };
+      const order = {
+        id: "ORD-" + Date.now(),
+        customer: data,
+        items: State.cart,
+        total:
+          "₦" +
+          State.cart
+            .reduce((sum, it) => sum + it.price * it.qty, 0)
+            .toLocaleString(),
+        date: new Date().toISOString(),
+      };
 
-    localStorage.setItem("ORDER_V1", JSON.stringify(order));
-    window.location.href = "payment.html";
-  });
-};
-
+      localStorage.setItem("ORDER_V1", JSON.stringify(order));
+      window.location.href = "payment.html";
+    });
+  };
 
   return {
     init: () => {
@@ -520,16 +522,38 @@ const Payment = (() => {
     const customerEl = document.getElementById("customerInfo");
 
     if (summaryEl) {
-      summaryEl.innerHTML =
-        order.items
+      summaryEl.innerHTML = `
+    <table border="0" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse; text-align:left;">
+      <thead>
+        <tr>
+        <th>Qty</th>
+        <th>Item</th>
+          <th>Price</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${order.items
           .map(
-            (it) =>
-              `<div class="row"><span>${it.qty} × ${it.name}</span><span>₦${(
-                it.price * it.qty
-              ).toLocaleString()}</span></div>`
+            (it) => `
+              <tr>
+              <td>${it.qty}</td>
+              <td>${it.name}</td>
+                <td>₦${it.price.toLocaleString()}</td>
+                <td>₦${(it.price * it.qty).toLocaleString()}</td>
+              </tr>
+            `
           )
-          .join("") +
-        `<div class="row total"><strong>Total:</strong><strong>${order.total}</strong></div>`;
+          .join("")}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight: bold;">
+          <td colspan="3" style="text-align:center;">Grand Total</td>
+          <td>${order.total.toLocaleString()}</td>
+        </tr>
+      </tfoot>
+    </table>
+  `;
     }
 
     if (customerEl) {
@@ -580,6 +604,99 @@ const Payment = (() => {
   };
 })();
 
+// MODULE 9: THANK YOU PAGE
+const ThankYou = (() => {
+  const render = () => {
+    let order = JSON.parse(localStorage.getItem("ORDER_V1") || "null") || {
+      items: [],
+      customer: {},
+    };
+    const payment =
+      JSON.parse(localStorage.getItem("PAYMENT_V1") || "null") || {};
+
+    // Generate Order ID if missing
+    if (!order.orderId) {
+      const uniqueId =
+        "MSH-" +
+        new Date().getFullYear() +
+        "-" +
+        Math.floor(10000 + Math.random() * 90000);
+      order.orderId = uniqueId;
+      localStorage.setItem("ORDER_V1", JSON.stringify(order));
+    }
+    const orderIdEl = document.getElementById("orderId");
+    if (orderIdEl) orderIdEl.textContent = order.orderId;
+
+    // Customer Info
+    const custEl = document.getElementById("customerSummary");
+    if (custEl && order.customer && order.customer.name) {
+      custEl.innerHTML = `
+        <p>
+          <strong>${order.customer.name}</strong>, 
+          ${order.customer.email || ""}, 
+          ${order.customer.phone || ""}, 
+          ${order.customer.address || ""}
+        </p>
+      `;
+    }
+
+    // Payment Info
+    const payEl = document.getElementById("paymentSummary");
+    if (payEl && payment.method) {
+      payEl.innerHTML = `<p><strong>${payment.method}</strong></p>`;
+    }
+
+    // Order Items
+    const orderSumEl = document.getElementById("orderSummary");
+    if (orderSumEl && order.items.length > 0) {
+      const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0);
+      orderSumEl.innerHTML = `
+        <table border="0" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse; text-align:left;">
+          <thead>
+            <tr>
+            <th style="text-align:center; padding:6px; border-bottom:1px solid #ddd;">Qty</th>
+            <th style="text-align:left; padding:6px; border-bottom:1px solid #ddd;">Item</th>
+              <th style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">Price</th>
+              <th style="text-align:right; padding:6px; border-bottom:1px solid #ddd;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items
+              .map(
+                (it) => `
+                <tr>
+                <td style="padding:6px; text-align:center; border-bottom:1px solid #eee;">${
+                  it.qty
+                }</td>
+                <td style="padding:6px; border-bottom:1px solid #eee;">${
+                  it.name
+                }</td>
+                  <td style="padding:6px; text-align:right; border-bottom:1px solid #eee;">₦${it.price.toLocaleString()}</td>
+                  <td style="padding:6px; text-align:right; border-bottom:1px solid #eee;">₦${(
+                    it.price * it.qty
+                  ).toLocaleString()}</td>
+                </tr>
+              `
+              )
+              .join("")}
+          </tbody>
+          <tfoot>
+            <tr style="font-weight: bold;">
+              <td colspan="3" style="text-align:center;">Grand Total</td>
+              <td style="padding:8px; text-align:right;">₦${subtotal.toLocaleString()}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    }
+
+    // ✅ Clear cart after successful order
+    localStorage.removeItem("CART_V1");
+  };
+
+  return { render };
+})();
+
 // INIT APP
 document.addEventListener("DOMContentLoaded", () => {
   HeaderFooter.init().then(() => {
@@ -588,10 +705,9 @@ document.addEventListener("DOMContentLoaded", () => {
     Cart.render();
     const params = new URLSearchParams(window.location.search);
     const productId = params.get("id");
-    if (productId) {
-      ProductRender.renderDetail(productId);
-    }
+    if (productId) ProductRender.renderDetail(productId);
     if (document.getElementById("checkoutForm")) Checkout.init();
     if (document.getElementById("paymentForm")) Payment.init();
+    if (document.getElementById("receiptArea")) ThankYou.render();
   });
 });

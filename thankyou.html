@@ -20,18 +20,13 @@
 
         <h2>Order ID</h2>
         <p id="orderId" style="font-weight: bold; font-size: 18px"></p>
-
-        <h2>Order Summary</h2>
-        <div id="orderSummary">No items found.</div>
-
         <h2>Customer Info</h2>
-        <div id="customerSummary">No customer info available.</div>
-
+        <div id="customerSummary"></div>
         <h2>Payment Method</h2>
-        <div id="paymentSummary">Not selected.</div>
+        <div id="paymentSummary"></div>
+        <h2>Order Summary</h2>
+        <div id="orderSummary"></div>
       </section>
-
-      <!-- Action buttons -->
       <div style="margin-top: 30px; display: flex; gap: 15px">
         <a
           href="index.html"
@@ -40,81 +35,13 @@
         >
           ← Continue Shopping
         </a>
-        <button class="print-btn" onclick="window.print()">
+        <button class="checkout print-btn" onclick="window.print()">
           🖨 Print Receipt
         </button>
       </div>
     </main>
-
-    <!-- FOOTER -->
     <div id="footer"></div>
 
     <script src="script.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        HeaderFooter.init();
-
-        // Load order & payment info safely
-        let order = JSON.parse(localStorage.getItem("ORDER_V1") || "null") || {
-          items: [],
-          customer: {},
-        };
-        const payment =
-          JSON.parse(localStorage.getItem("PAYMENT_V1") || "null") || {};
-
-        // Generate Order ID if missing
-        if (!order.orderId) {
-          const uniqueId =
-            "MSH-" +
-            new Date().getFullYear() +
-            "-" +
-            Math.floor(10000 + Math.random() * 90000);
-          order.orderId = uniqueId;
-          localStorage.setItem("ORDER_V1", JSON.stringify(order));
-        }
-        document.getElementById("orderId").textContent = order.orderId;
-
-        // Customer Info
-        if (order.customer && order.customer.name) {
-          document.getElementById("customerSummary").innerHTML = `
-            <p><strong>${order.customer.name}</strong></p>
-            <p>${order.customer.email || ""}</p>
-            <p>${order.customer.phone || ""}</p>
-            <p>${order.customer.address || ""}</p>
-          `;
-        }
-
-        // Payment Info
-        if (payment && payment.method) {
-          document.getElementById("paymentSummary").innerHTML = `
-            <p><strong>${payment.method}</strong></p>
-          `;
-        }
-
-        // Order Items
-        if (order.items && order.items.length > 0) {
-          const subtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0);
-          document.getElementById("orderSummary").innerHTML = `
-            ${order.items
-              .map(
-                (it) => `
-              <div class="row" style="margin-bottom:6px; display:flex; justify-content:space-between;">
-                <span>${it.qty} × ${it.name}</span>
-                <span>₦${(it.price * it.qty).toLocaleString()}</span>
-              </div>
-            `
-              )
-              .join("")}
-            <div class="row total" style="margin-top:10px; font-size:16px; font-weight:bold; display:flex; justify-content:space-between;">
-              <span>Total</span>
-              <span>₦${subtotal.toLocaleString()}</span>
-            </div>
-          `;
-        }
-
-        // 🧹 Clear cart after successful order
-        localStorage.removeItem("CART_V1");
-      });
-    </script>
   </body>
 </html>

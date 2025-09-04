@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div id="header"></div>
+    <div>
+      <div id="header"></div>
 
-    <main class="container">
-      <section class="cart-summary checkout-header" style="margin-top: 2rem">
-        <h1>Checkout</h1>
-        <p>Complete your order in a few easy steps.</p>
-      </section>
-      <div class="checkout-grid">
+      <main class="container">
+        <section class="cart-summary checkout-header" style="margin-top: 2rem">
+          <h1>Checkout</h1>
+          <p>Complete your order in a few easy steps.</p>
+        </section>
         <div class="checkout-form">
           <form id="checkoutForm">
             <section class="cart-summary">
@@ -73,27 +73,15 @@
                 Country
                 <input type="text" name="country" value="Nigeria" required />
               </label>
-
-              <h2>Payment Method</h2>
-              <div class="payment-options">
-                <label>
-                  <input type="radio" name="payment" value="card" required />
-                  💳 Pay with Card
-                </label>
-                <label>
-                  <input type="radio" name="payment" value="transfer" />
-                  🏦 Bank Transfer
-                </label>
-                <label>
-                  <input type="radio" name="payment" value="cod" />
-                  🚚 Cash on Delivery
-                </label>
-              </div>
             </section>
 
             <aside class="cart-summary checkout-summary">
               <div class="checkout-actions">
-                <a href="cart.html" class="back-cart">← Back to Cart</a>
+                <button class="checkout-btn">
+                  <a href="cart.html" class="back-cart" style="color: white"
+                    >← Back to Cart</a
+                  >
+                </button>
                 <button type="submit" form="checkoutForm" class="checkout-btn">
                   Proceed to Payment →
                 </button>
@@ -101,10 +89,11 @@
             </aside>
           </form>
         </div>
-      </div>
-    </main>
+        <div class="checkout-grid"></div>
+      </main>
 
-    <div id="footer"></div>
+      <div id="footer"></div>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>
