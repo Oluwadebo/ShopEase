@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>ShopEase</title>
   </head>
   <body>
     <header class="header">
@@ -28,26 +28,32 @@
           <input
             id="searchInput"
             type="search"
-            placeholder="Search products…"
+            placeholder="Search for anything..."
             aria-label="Search"
           />
         </label>
         <nav class="main-nav">
           <ul>
             <li><a href="index.html">Home</a></li>
-            <!-- <li><a href="product.html">Shop</a></li> -->
-            <li><a href="#" class="non">Deals</a></li>
-            <li><a href="#" class="non">Contact</a></li>
+            <li><a href="#" class="non">Today’s Deals</a></li>
+            <li><a href="#" class="non">Customer Service</a></li>
           </ul>
         </nav>
         <div class="actions">
-          <a href="" class="icon-btn non" aria-label="Wishlist"> ❤️ </a>
-          <a href="" class="icon-btn non" aria-label="User Account"> 👤 </a>
-          <a href="cart.html" class="">
-            <button class="icon-btn badge" aria-label="Open cart">
-              🛒<span class="badge"> <span id="cartCount">0</span></span>
-            </button></a
+          <!-- <a href="" class="icon-btn non" aria-label="Your Wishlist"> ❤️ </a> -->
+          <button onclick="logout()" class="btn btn-danger">Logout</button>
+          <a
+            href="/profile.html"
+            class="icon-btn non"
+            aria-label="Your Account"
           >
+            👤
+          </a>
+          <a href="cart.html">
+            <button class="icon-btn badge" aria-label="View Cart">
+              🛒 <span class="badge"><span id="cartCount">0</span></span>
+            </button>
+          </a>
         </div>
       </div>
     </header>

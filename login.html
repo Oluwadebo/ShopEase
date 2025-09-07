@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | ShopEase</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0d10;
+        --panel: #12151a;
+        --muted: #1a1f27;
+        --text: #e9eef5;
+        --text-dim: #b6c2d0;
+        --brand: #4f8cff;
+        --brand-2: #7c5cff;
+        --accent: #20d6a7;
+        --danger: #ff6b6b;
+        --ring: rgba(79, 140, 255, 0.5);
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        --radius: 18px;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, sans-serif;
+      }
+      .login-container {
+        max-width: 400px;
+        margin: 5% auto;
+        background: var(--panel);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+      }
+      .brand-logo {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .brand-logo h1 {
+        color: var(--brand);
+        font-weight: bold;
+        font-size: 2rem;
+      }
+      .form-label {
+        color: var(--text-dim);
+        font-weight: 500;
+      }
+      .btn-brand {
+        background: linear-gradient(135deg, var(--accent), var(--brand));
+        color: #000;
+        font-weight: 600;
+      }
+      .btn-brand:hover {
+        background: #ffb84d;
+        color: #000;
+      }
+      .extra-links {
+        margin-top: 1rem;
+        text-align: center;
+      }
+      .extra-links a {
+        color: var(--brand);
+        text-decoration: none;
+      }
+      .extra-links a:hover {
+        text-decoration: underline;
+      }
+      .password-wrapper {
+        position: relative;
+      }
+      .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 75%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #12151a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="brand-logo"><h1>ShopEase</h1></div>
+      <h4 class="text-center mb-3">Sign-In</h4>
+
+      <form id="loginForm">
+        <div id="loginMessage"></div>
+
+        <div class="mb-3">
+          <label class="form-label" for="email"
+            >Email or mobile phone number</label
+          >
+          <input type="email" class="form-control" id="email" required />
+        </div>
+
+        <div class="mb-3 password-wrapper">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" class="form-control" id="password" required />
+          <i class="bi bi-eye toggle-password" data-target="password"></i>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="rememberMe" />
+          <label for="rememberMe" class="form-check-label">Remember me</label>
+        </div>
+
+        <button type="submit" class="btn btn-brand w-100">Continue</button>
+      </form>
+
+      <div class="extra-links">
+        <p><a href="#">Forgot Password?</a></p>
+        <p>New to ShopEase? <a href="signup.html">Create your account</a></p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

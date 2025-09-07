@@ -696,6 +696,103 @@ const ThankYou = (() => {
   return { render };
 })();
 
+// MODULE 10: signup & login PAGE
+// 🔹 Show/Hide password toggle
+document
+  .querySelectorAll(".toggle-password, .toggle-passwords")
+  .forEach((icon) => {
+    icon.addEventListener("click", () => {
+      const input = document.getElementById(icon.dataset.target);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace("bi-eye", "bi-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.replace("bi-eye-slash", "bi-eye");
+      }
+    });
+  });
+
+function showMessage(id, text, type = "danger") {
+  const msgBox = document.getElementById(id);
+  msgBox.innerHTML = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${text}
+        </div>
+  `;
+}
+// 🔹 Signup Logic
+const signupForm = document.getElementById("signupForm");
+if (signupForm) {
+  signupForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("fullname").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const repassword = document.getElementById("repassword").value;
+
+    if (password.length < 6) {
+      showMessage("signupMessage", "Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== repassword) {
+      showMessage("signupMessage", "Passwords do not match!");
+      return;
+    }
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    if (users.find((u) => u.email === email)) {
+      showMessage("signupMessage", "Email already registered. Please login.");
+      return;
+    }
+    users.push({ name, email, password });
+    localStorage.setItem("users", JSON.stringify(users));
+    window.location.href = "login.html";
+  });
+}
+
+// 🔹 Login Logic
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const rememberMe = document.getElementById("rememberMe").checked;
+
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    const user = users.find((u) => u.email === email);
+
+    if (!user) {
+      showMessage(
+        "loginMessage",
+        "Email not found! Please sign up first.",
+        "danger"
+      );
+      return;
+    }
+    if (user.password !== password) {
+      showMessage("loginMessage", "Incorrect password!", "danger");
+      return;
+    }
+    localStorage.setItem("loggedInUser", JSON.stringify(user));
+    if (rememberMe) {
+      localStorage.setItem("rememberedUser", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("rememberedUser");
+    }
+    window.location.href = "index.html";
+  });
+}
+
+// 🔹 Logout Logic
+function logout() {
+  localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("rememberedUser");
+  window.location.href = "login.html";
+}
+
 // INIT APP
 document.addEventListener("DOMContentLoaded", () => {
   HeaderFooter.init().then(() => {
@@ -709,4 +806,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById("paymentForm")) Payment.init();
     if (document.getElementById("receiptArea")) ThankYou.render();
   });
+  const remembered = JSON.parse(localStorage.getItem("rememberedUser"));
+  if (remembered) {
+    localStorage.setItem("loggedInUser", JSON.stringify(remembered));
+    if (window.location.pathname.includes("login.html")) {
+      window.location.href = "index.html";
+    }
+  }
 });
